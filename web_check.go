@@ -23,7 +23,7 @@ func main() {
 	}
 	go check_loop()
 	http.HandleFunc("/", indexHandler)
-	http.ListenAndServe(":8088", nil)
+	http.ListenAndServe(ip, nil)
 }
 
 func parse_args() bool {
