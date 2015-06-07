@@ -1,0 +1,14 @@
+<html>
+<head>
+<title>Проверка веб-службы</title>
+</head>
+<body>
+<h1>История проверки</h1>
+<div>{{.url}}</div>
+<div>
+{{range $h  := .check_history}}
+{{$h}}<br/>
+{{end}}
+</div>
+</body>
+</html>

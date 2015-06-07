@@ -4,6 +4,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"time"
@@ -99,10 +100,6 @@ func save_history(tm, s string) {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	//  Выдает историю проверок в браузер
-	var html = `<html><head><title>Проверка веб-службы</title></head><body><h1>История проверки</h1><div>%s</div></body></html>`
-	s := ""
-	for _, h := range check_history {
-		s += fmt.Sprintf("%s<br/>\n", h)
-	}
-	fmt.Fprintf(w, fmt.Sprintf(html, s))
+	t, _ := template.ParseFiles("templates/index.html")
+	t.Execute(w, map[string]interface{}{"check_history": check_history, "url": url})
 }
