@@ -52,6 +52,7 @@ func parse_args() bool {
 func check_loop() {
 	for {
 		tm := time.Now().Format("2006-01-02 15:04:05")
+		fmt.Println("Проверяем адрес ", url)
 		// статус, который возвращает check, пока не используем, поэтому ставим _
 		_, msg := check(url)
 		log_to_file(tm, msg)
@@ -63,7 +64,6 @@ func check_loop() {
 
 func check(url string) (bool, string) {
 	// возвращает true - если сервис доступен, false, если нет и текст сообщения
-	fmt.Println("Проверяем адрес ", url)
 	resp, err := http.Get(url)
 
 	if err != nil {
