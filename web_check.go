@@ -28,7 +28,7 @@ func main() {
 
 func parse_args() bool {
 	flag.StringVar(&url, "url", "", "Адрес для проверки. Например, http://golang.org/")
-	flag.IntVar(&timeout, "t", 5, "Период проверки в минутах. Должен быть больше 2")
+	flag.IntVar(&timeout, "t", 30, "Период проверки в секундах. Должен быть больше 15 сек")
 	flag.IntVar(&hist_length, "l", 30, "Длина истории в браузере")
 	flag.StringVar(&ip, "i", ":8090", "ip:port для веб-статистики")
 	flag.Parse()
@@ -37,8 +37,8 @@ func parse_args() bool {
 		fmt.Println("Не задан параметр -url", url)
 		return false
 	}
-	if timeout < 2 {
-		fmt.Println("Значение -i должно быть больше 2. Задано: ", timeout)
+	if timeout < 15 {
+		fmt.Println("Значение -i должно быть больше 15. Задано: ", timeout)
 		return false
 	}
 	if hist_length < 1 {
@@ -56,7 +56,7 @@ func check_loop() {
 		log_to_file(tm, msg)
 		save_history(tm, msg)
 		fmt.Println(tm, msg)
-		time.Sleep(time.Duration(timeout) * time.Minute)
+		time.Sleep(time.Duration(timeout) * time.Second)
 	}
 }
 
