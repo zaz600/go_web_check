@@ -72,7 +72,7 @@ func check(url string) (bool, string) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return false, fmt.Sprintf("Ошибка. http-статус: %s", resp.StatusCode)
+		return false, fmt.Sprintf("Ошибка. http-статус: %d", resp.StatusCode)
 	}
 	return true, fmt.Sprintf("Онлайн. http-статус: %d", resp.StatusCode)
 }
