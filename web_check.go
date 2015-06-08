@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,6 +18,8 @@ var (
 	hist_length   int
 	timeout       int
 	ip            string
+	states_ok     string
+	states_ok_map map[string]bool
 )
 
 func main() {
@@ -32,6 +36,7 @@ func parse_args() bool {
 	flag.IntVar(&timeout, "t", 30, "Период проверки в секундах. Должен быть больше 15 сек")
 	flag.IntVar(&hist_length, "l", 30, "Длина истории в браузере")
 	flag.StringVar(&ip, "i", ":8090", "ip:port для веб-статистики")
+	flag.StringVar(&states_ok, "states", "200", "статусы, которые не считаются ошибочными. Например, 200,500")
 	flag.Parse()
 
 	if url == "" {
@@ -45,6 +50,10 @@ func parse_args() bool {
 	if hist_length < 1 {
 		fmt.Println("Значение -l должно быть больше 1. Задано: ", hist_length)
 		return false
+	}
+	states_ok_map = make(map[string]bool)
+	for _, status := range strings.Split(states_ok, ",") {
+		states_ok_map[status] = true
 	}
 	return true
 }
@@ -71,7 +80,7 @@ func check(url string) (bool, string) {
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if _, ok := states_ok_map[strconv.Itoa(resp.StatusCode)]; ok != true {
 		return false, fmt.Sprintf("Ошибка. http-статус: %d", resp.StatusCode)
 	}
 	return true, fmt.Sprintf("Онлайн. http-статус: %d", resp.StatusCode)
