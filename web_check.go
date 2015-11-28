@@ -13,30 +13,30 @@ import (
 )
 
 var (
-	check_history []string
-	url           string
-	hist_length   int
-	timeout       int
-	ip            string
-	states_ok     string
-	states_ok_map map[string]bool
+	checkHistory []string
+	url          string
+	histLength   int
+	timeout      int
+	ip           string
+	statesOk     string
+	statesOkMap  map[string]bool
 )
 
 func main() {
-	if !parse_args() {
+	if !parseArgs() {
 		return
 	}
-	go check_loop()
+	go checkLoop()
 	http.HandleFunc("/", indexHandler)
 	http.ListenAndServe(ip, nil)
 }
 
-func parse_args() bool {
+func parseArgs() bool {
 	flag.StringVar(&url, "url", "", "Адрес для проверки. Например, http://golang.org/")
 	flag.IntVar(&timeout, "t", 30, "Период проверки в секундах. Должен быть больше 15 сек")
-	flag.IntVar(&hist_length, "l", 30, "Длина истории в браузере")
+	flag.IntVar(&histLength, "l", 30, "Длина истории в браузере")
 	flag.StringVar(&ip, "i", ":8090", "ip:port для веб-статистики")
-	flag.StringVar(&states_ok, "states", "200", "статусы, которые не считаются ошибочными. Например, 200,500")
+	flag.StringVar(&statesOk, "states", "200", "статусы, которые не считаются ошибочными. Например, 200,500")
 	flag.Parse()
 
 	if url == "" {
@@ -47,25 +47,25 @@ func parse_args() bool {
 		fmt.Println("Значение -i должно быть больше 15. Задано: ", timeout)
 		return false
 	}
-	if hist_length < 1 {
-		fmt.Println("Значение -l должно быть больше 1. Задано: ", hist_length)
+	if histLength < 1 {
+		fmt.Println("Значение -l должно быть больше 1. Задано: ", histLength)
 		return false
 	}
-	states_ok_map = make(map[string]bool)
-	for _, status := range strings.Split(states_ok, ",") {
-		states_ok_map[status] = true
+	statesOkMap = make(map[string]bool)
+	for _, status := range strings.Split(statesOk, ",") {
+		statesOkMap[status] = true
 	}
 	return true
 }
 
-func check_loop() {
+func checkLoop() {
 	for {
 		tm := time.Now().Format("2006-01-02 15:04:05")
 		fmt.Println("Проверяем адрес ", url)
 		// статус, который возвращает check, пока не используем, поэтому ставим _
 		_, msg := check(url)
-		log_to_file(tm, msg)
-		save_history(tm, msg)
+		logToFile(tm, msg)
+		saveHistory(tm, msg)
 		fmt.Println(tm, msg)
 		time.Sleep(time.Duration(timeout) * time.Second)
 	}
@@ -80,13 +80,13 @@ func check(url string) (bool, string) {
 	}
 
 	defer resp.Body.Close()
-	if _, ok := states_ok_map[strconv.Itoa(resp.StatusCode)]; ok != true {
+	if _, ok := statesOkMap[strconv.Itoa(resp.StatusCode)]; ok != true {
 		return false, fmt.Sprintf("Ошибка. http-статус: %d", resp.StatusCode)
 	}
 	return true, fmt.Sprintf("Онлайн. http-статус: %d", resp.StatusCode)
 }
 
-func log_to_file(tm, s string) {
+func logToFile(tm, s string) {
 	//  Сохраняет сообщения в файл
 	f, err := os.OpenFile("web_check.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
@@ -99,16 +99,16 @@ func log_to_file(tm, s string) {
 	}
 }
 
-func save_history(tm, s string) {
+func saveHistory(tm, s string) {
 	//  добавляет запись в массив с историей проверок
-	check_history = append(check_history, fmt.Sprintf("%s %s", tm, s))
-	if len(check_history) > hist_length {
-		check_history = check_history[1:]
+	checkHistory = append(checkHistory, fmt.Sprintf("%s %s", tm, s))
+	if len(checkHistory) > histLength {
+		checkHistory = checkHistory[1:]
 	}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	//  Выдает историю проверок в браузер
 	t, _ := template.ParseFiles("templates/index.html")
-	t.Execute(w, map[string]interface{}{"check_history": check_history, "url": url})
+	t.Execute(w, map[string]interface{}{"checkHistory": checkHistory, "url": url})
 }
