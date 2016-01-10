@@ -58,6 +58,7 @@ func parseArgs() bool {
 	return true
 }
 
+//checkLoop цикл проверки сервисов
 func checkLoop() {
 	for {
 		tm := time.Now().Format("2006-01-02 15:04:05")
@@ -71,8 +72,8 @@ func checkLoop() {
 	}
 }
 
+//check возвращает true - если сервис доступен, false, если нет и текст сообщения
 func check(url string) (bool, string) {
-	// возвращает true - если сервис доступен, false, если нет и текст сообщения
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -86,8 +87,8 @@ func check(url string) (bool, string) {
 	return true, fmt.Sprintf("Онлайн. http-статус: %d", resp.StatusCode)
 }
 
+//logToFile сохраняет сообщения в файл
 func logToFile(tm, s string) {
-	//  Сохраняет сообщения в файл
 	f, err := os.OpenFile("web_check.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		fmt.Println(tm, err)
@@ -99,16 +100,16 @@ func logToFile(tm, s string) {
 	}
 }
 
+//saveHistory добавляет запись в массив с историей проверок
 func saveHistory(tm, s string) {
-	//  добавляет запись в массив с историей проверок
 	checkHistory = append(checkHistory, fmt.Sprintf("%s %s", tm, s))
 	if len(checkHistory) > histLength {
 		checkHistory = checkHistory[1:]
 	}
 }
 
+//indexHandler выдает историю проверок в браузер
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	//  Выдает историю проверок в браузер
 	t, _ := template.ParseFiles("templates/index.html")
 	t.Execute(w, map[string]interface{}{"checkHistory": checkHistory, "url": url})
 }
